@@ -1,0 +1,33 @@
+﻿<Window x:Class="JoyelWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:JoyelWPF"
+        mc:Ignorable="d"
+        Title="Joyel v0.01" Height="450" Width="800">
+    <Grid>
+        <TextBox x:Name="textBox_console" HorizontalAlignment="Left" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Bottom" Width="216" Height="148" Margin="369,0,0,143" Visibility="Hidden"/>
+        <GroupBox x:Name="groupBox_settings" Header="Settings" Margin="10,10,0,0" Width="200" Height="414" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Grid x:Name="Settings" Height="371" HorizontalAlignment="Center" Width="190" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                <Grid x:Name="grid_padding" Margin="0,10,0,0" Height="60" VerticalAlignment="Top" HorizontalAlignment="Center" Width="190" RenderTransformOrigin="0,0.5">
+                    <TextBlock x:Name="textBlock_padding" Margin="0,0,0,0" HorizontalAlignment="Center" TextWrapping="Wrap" Text="Padding (px)" Width="170" FontWeight="Bold" Height="20" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox_padding" Margin="0,20,0,0" TextWrapping="Wrap" Text="300" FontSize="10" HorizontalAlignment="Center" Width="170" Height="20" VerticalAlignment="Top" InputScope="Number"/>
+                    <Separator HorizontalAlignment="Center" Margin="0,50,0,0" Width="170" Height="6" VerticalAlignment="Top"/>
+                </Grid>
+                <Grid x:Name="grid_deadzone" Margin="0,70,0,0" Height="60" VerticalAlignment="Top" HorizontalAlignment="Center" Width="190">
+                    <TextBlock x:Name="textBlock_deadzone" Margin="0,0,0,0" HorizontalAlignment="Center" TextWrapping="Wrap" Text="Deadzone (%)" Width="170" FontWeight="Bold" Height="20" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox_deadzone" Margin="0,20,0,0" TextWrapping="Wrap" Text="10" FontSize="10" HorizontalAlignment="Center" Width="170" Height="20" VerticalAlignment="Top" InputScope="Number"/>
+                    <Separator HorizontalAlignment="Center" Margin="0,50,0,0" Width="170" Height="6" VerticalAlignment="Top"/>
+                </Grid>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBox_status" Header="Steering" Margin="200,10,0,0" Width="540" Height="84" VerticalAlignment="Top">
+            <Grid>
+                <TextBlock x:Name="textBlock_steeringValue" HorizontalAlignment="Center" Margin="0,0,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="30" Width="520" TextAlignment="Center" FontWeight="Bold" Foreground="Black"/>
+                <Slider x:Name="slider_steeringValue" HorizontalAlignment="Center" Margin="0,25,0,0" Width="520" Minimum="-100" Maximum="100" Height="18" VerticalAlignment="Top"/>
+                <Button x:Name="button_inputStatus" Content="" HorizontalAlignment="Left" Margin="50,-12,0,0" VerticalAlignment="Top" Foreground="White" Background="Red" Width="10" Height="10"/>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>
