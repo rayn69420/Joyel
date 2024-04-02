@@ -1,3 +1,6 @@
+Joyel is a proof of concept tool which is made by the mouse and keyboard gang.
+It's purpose is to prove that regular PC peripheral can be viable for racing games by taking the horizontal position of your cursor and translate it as an input for a virtual joystick.
+
 Install:
 - Install the [ViGEmBusDriver](https://vigembusdriver.com/).
 - Start with JoyelWPF.exe
