@@ -36,6 +36,8 @@ namespace JoyelWPF
         ViGEmClient client = new ViGEmClient();
         IXbox360Controller? controller = null;
 
+        bool mouseOnlyMode = true;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -61,6 +63,7 @@ namespace JoyelWPF
                 bool isLeftMousePressed = IsMouseButtonPressed(MouseButton.LeftMouseButton);
                 bool isRightMousePressed = IsMouseButtonPressed(MouseButton.RightMouseButton);
 
+                bool? isMouseOnly = InvokeFuncOnMain(delegate { return checkBox_mouseOnly.IsChecked; });
                 int deadzonePercent = InvokeFuncOnMain(delegate { return int.Parse(textBox_deadzone.Text); });
                 int lPadding = InvokeFuncOnMain(delegate { return int.Parse(textBox_padding.Text); });
                 int rPadding = screenWidth - lPadding;
@@ -76,34 +79,64 @@ namespace JoyelWPF
                 short steeringValue = short.Clamp((short)(steerValueUI * (STEERING_MAX / 100)), -STEERING_MAX, STEERING_MAX);
                 UpdateSteeringText(steerValueUI + "% [" + steeringValue + "]");
 
-                Color statusColor = Colors.White;
+                if (isMouseOnly.HasValue && isMouseOnly.Value == true)
+                {
+                    bool goForward = false;
+                    if (isLeftMousePressed) goForward = true;
 
-                if (isLeftMousePressed)
-                    statusColor = Colors.LightGreen;
+                    bool goBackward = false;
+                    if (isRightMousePressed) goBackward = true;
+
+                    InputForward(goForward);
+                    InputBackward(goBackward);
+                    InputSteering(steeringValue);
+                    UpdateStatusLed(Colors.Yellow);
+
+                    Thread.Sleep(10);
+                    continue;
+                }
+
+                Color statusColor = Colors.White;
 
                 if (isRightMousePressed)
                 {
                     steeringValue = 0;
+                    InputSteering(steeringValue);
                     statusColor = Colors.OrangeRed;
                 }
 
+                if (isLeftMousePressed)
+                {
+                    InputSteering(steeringValue);
+                    statusColor = Colors.LightGreen;
+                }
+
                 UpdateStatusLed(statusColor);
-                InputSteering(steeringValue);
 
                 Thread.Sleep(10);
             }
         }
 
+        #region UI Actions
+
+        private void checkBox_mouseOnly_Unchecked(object sender, RoutedEventArgs e)
+        {
+            InputForward(false);
+            InputBackward(false);
+        }
+
+        #endregion UI Actions
+
         #region UI Helpers
 
-        private int InvokeFuncOnMain(Func<int> action)
+        private T InvokeFuncOnMain<T>(Func<T> action)
         {
-            int result = -1;
+            object result = null;
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
                 result = action();
             });
-            return result;
+            return (T)result;
         }
 
         private void InvokeActionOnMain(Action action)
@@ -171,5 +204,6 @@ namespace JoyelWPF
         }
 
         #endregion Helper Methods
+
     }
 }
