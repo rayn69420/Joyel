@@ -13,30 +13,27 @@ namespace JoyelWPF
     public partial class MainWindow : Window
     {
         [DllImport("user32.dll")]
-        public static extern bool GetCursorPos(out Point pos);
+        private static extern bool GetCursorPos(out Point pos);
 
         [DllImport("user32.dll")]
-        public static extern bool GetAsyncKeyState(int button);
+        private static extern bool GetAsyncKeyState(int button);
 
-        public enum MouseButton
+        private enum MouseButton
         {
             LeftMouseButton = 0x01,
             RightMouseButton = 0x02,
             MiddleMouseButton = 0x04,
         }
 
-        public struct Point
+        private struct Point
         {
             public int X;
             public int Y;
         }
 
-        const short STEERING_MAX = 16384;
-
-        ViGEmClient client = new ViGEmClient();
-        IXbox360Controller? controller = null;
-
-        bool mouseOnlyMode = true;
+        private const short STEERING_MAX = 16384;
+        private ViGEmClient client = new ViGEmClient();
+        private IXbox360Controller? controller = null;
 
         public MainWindow()
         {
@@ -53,39 +50,48 @@ namespace JoyelWPF
         {
             ConnectController();
 
-            int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
+            bool isLeftMousePressed = false;
+            bool isRightMousePressed = false;
+            bool? isMouseOnly = false;
 
-            //InputForward(false);
-            //InputBackward(false);
+            int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
+            int deadzonePercent = 0;
+            int lPadding = 0;
+            int rPadding = 0;
+            int mousePosX = 0;
+
+            int steerPercent = 0;
+            int steerValueUI = 0;
+            short steeringValue = 0;
+
+            bool goForward = false;
+            bool goBackward = false;
 
             while (true)
             {
-                bool isLeftMousePressed = IsMouseButtonPressed(MouseButton.LeftMouseButton);
-                bool isRightMousePressed = IsMouseButtonPressed(MouseButton.RightMouseButton);
+                isLeftMousePressed = IsMouseButtonPressed(MouseButton.LeftMouseButton);
+                isRightMousePressed = IsMouseButtonPressed(MouseButton.RightMouseButton);
 
-                bool? isMouseOnly = InvokeFuncOnMain(delegate { return checkBox_mouseOnly.IsChecked; });
-                int deadzonePercent = InvokeFuncOnMain(delegate { return int.Parse(textBox_deadzone.Text); });
-                int lPadding = InvokeFuncOnMain(delegate { return int.Parse(textBox_padding.Text); });
-                int rPadding = screenWidth - lPadding;
-                int mousePosX = GetMousePosX();
+                isMouseOnly = InvokeFuncOnMain(delegate { return checkBox_mouseOnly.IsChecked; });
+                deadzonePercent = InvokeFuncOnMain(delegate { return int.Parse(textBox_deadzone.Text); });
+                lPadding = InvokeFuncOnMain(delegate { return int.Parse(textBox_padding.Text); });
+                rPadding = screenWidth - lPadding;
+                mousePosX = GetMousePosX();
 
-                int steerPercent = ((mousePosX - lPadding) * 200) / (rPadding - lPadding);
-                int steerValueUI = int.Clamp((steerPercent - 100), -100, 100);
+                steerPercent = ((mousePosX - lPadding) * 200) / (rPadding - lPadding);
+                steerValueUI = int.Clamp((steerPercent - 100), -100, 100);
 
                 if (steerValueUI < deadzonePercent && steerValueUI > 0) steerValueUI = 0;
                 else if (steerValueUI > -deadzonePercent && steerValueUI < 0) steerValueUI = 0;
                 UpdateSteeringSlider(steerValueUI);
 
-                short steeringValue = short.Clamp((short)(steerValueUI * (STEERING_MAX / 100)), -STEERING_MAX, STEERING_MAX);
+                steeringValue = short.Clamp((short)(steerValueUI * (STEERING_MAX / 100)), -STEERING_MAX, STEERING_MAX);
                 UpdateSteeringText(steerValueUI + "% [" + steeringValue + "]");
 
                 if (isMouseOnly.HasValue && isMouseOnly.Value == true)
                 {
-                    bool goForward = false;
-                    if (isLeftMousePressed) goForward = true;
-
-                    bool goBackward = false;
-                    if (isRightMousePressed) goBackward = true;
+                    goForward = (isLeftMousePressed) ? true : false;
+                    goBackward = (isRightMousePressed) ? true : false;
 
                     InputForward(goForward);
                     InputBackward(goBackward);
@@ -144,21 +150,21 @@ namespace JoyelWPF
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { action(); });
         }
 
-        #endregion
+        #endregion UI Helpers
 
         #region UI Methods
 
-        void UpdateSteeringSlider(int value)
+        private void UpdateSteeringSlider(int value)
         {
             InvokeActionOnMain(delegate { slider_steeringValue.Value = value; });
         }
 
-        void UpdateStatusLed(Color color)
+        private void UpdateStatusLed(Color color)
         {
             InvokeActionOnMain(delegate { button_inputStatus.Background = new SolidColorBrush(color); });
         }
 
-        void UpdateSteeringText(string text)
+        private void UpdateSteeringText(string text)
         {
             InvokeActionOnMain(delegate { textBlock_steeringValue.Text = text; });
         }
@@ -167,7 +173,7 @@ namespace JoyelWPF
 
         #region Controller Inputs
 
-        void ConnectController()
+        private void ConnectController()
         {
             controller = client.CreateXbox360Controller();
             controller.Connect();
